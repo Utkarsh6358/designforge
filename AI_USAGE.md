@@ -17,19 +17,19 @@ Below are the key architectural decisions shaped through AI assistance.
 
 ---
 
-## Decision 1: Tech Stack — Next.js Full-Stack with Prisma + SQLite
+## Decision 1: Tech Stack — Next.js Full-Stack with Prisma (SQLite Local / PostgreSQL Production)
 
 ### AI Suggestion
 
-AI presented multiple stack options ranging from minimal vanilla scripts to complex multi-repo architectures. It recommended a full-stack Next.js (App Router) approach with Prisma ORM and SQLite for local development, utilizing Next.js API routes as the backend to eliminate multi-service deployment overhead.
+AI presented multiple stack options ranging from minimal vanilla scripts to complex multi-repo architectures. It recommended a full-stack Next.js (App Router) approach with Prisma ORM, using SQLite for zero-setup local execution and PostgreSQL for cloud deployment, utilizing Next.js API routes to eliminate multi-service deployment overhead.
 
 ### Decision
 
-**Accepted.** Adopted Next.js with TypeScript, Prisma, and SQLite.
+**Accepted.** Adopted Next.js with TypeScript and Prisma (SQLite locally, PostgreSQL via Supabase in production).
 
 ### Reason
 
-A full-stack Next.js project unifies frontend and backend in a single repository with zero boilerplate overhead, ideal for a 2-day engineering assignment. SQLite provides instant zero-setup local execution while Prisma preserves type safety and makes transitioning to PostgreSQL or MongoDB seamless for production.
+A full-stack Next.js project unifies frontend and backend in a single repository with zero boilerplate overhead, ideal for a 2-day engineering assignment. SQLite provides instant zero-setup local execution, while Prisma keeps the persistence layer completely database-agnostic — allowing the deployed application on Vercel to use managed PostgreSQL without altering the domain model.
 
 ---
 

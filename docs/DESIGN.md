@@ -253,7 +253,7 @@ sequenceDiagram
 |----------|--------|----------|-----------|
 | Submission format | Structured text | Diagrams, full code | Diagrams need a rendering UI; code needs a compiler/sandbox. Text exposes design reasoning directly — the thing being evaluated. |
 | Auth | Demo login | OAuth / session-based | 2-day prototype — evaluators assess LLD quality, not auth implementation. |
-| Database | SQLite (via Prisma) | MongoDB Atlas, PostgreSQL | Zero-setup local development. Prisma abstracts the DB, so switching later is trivial. |
+| Database | SQLite locally, PostgreSQL in production (via Prisma) | Single-DB hardcoding, MongoDB Atlas | SQLite was chosen for zero-setup local development. Prisma keeps the persistence layer database-agnostic, allowing the deployed application to use managed PostgreSQL (Supabase) in production without changing the domain model. |
 | AI evaluator | Mock (default) | Always-on AI | Works without API key. Architecture proves the Strategy pattern regardless. |
 | Frontend | Clean functional | Glassmorphism / heavy animation | Time budget goes to evaluation quality and tests, not visual polish. |
 | Problem count | 3 | 5+ | Enough to demonstrate the loop. Less content authoring burden. |
