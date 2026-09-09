@@ -50,3 +50,68 @@ export async function GET(
     );
   }
 }
+
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    const attempt = await prisma.attempt.findUnique({
+      where: { id },
+      include: {
+        submissions: {
+          select: {
+            id: true,
+            evaluation: { select: { id: true } },
+          },
+        },
+      },
+    });
+
+    if (!attempt) {
+      return NextResponse.json(
+        { error: "Attempt not found" },
+        { status: 404 }
+      );
+    }
+
+    const submissionIds = attempt.submissions.map((s) => s.id);
+    const evaluationIds = attempt.submissions
+      .map((s) => s.evaluation?.id)
+      .filter(Boolean) as string[];
+
+    await prisma.$transaction([
+      ...(evaluationIds.length > 0
+        ? [
+            prisma.feedback.deleteMany({
+              where: { evaluationId: { in: evaluationIds } },
+            }),
+            prisma.evaluation.deleteMany({
+              where: { id: { in: evaluationIds } },
+            }),
+          ]
+        : []),
+      ...(submissionIds.length > 0
+        ? [
+            prisma.submission.deleteMany({
+              where: { id: { in: submissionIds } },
+            }),
+          ]
+        : []),
+      prisma.attempt.delete({
+        where: { id },
+      }),
+    ]);
+
+    return NextResponse.json({ success: true, message: "Attempt deleted successfully" });
+  } catch (error) {
+    console.error("Failed to delete attempt:", error);
+    return NextResponse.json(
+      { error: "Failed to delete attempt" },
+      { status: 500 }
+    );
+  }
+}
+

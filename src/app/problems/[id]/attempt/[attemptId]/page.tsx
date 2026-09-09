@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 interface FeedbackItem {
@@ -32,8 +32,10 @@ interface Submission {
 
 interface AttemptDetail {
   id: string;
+  problemId: string;
   status: string;
   problem: {
+    id: string;
     title: string;
     slug: string;
     requirements: string[];
@@ -55,6 +57,7 @@ const SECTION_PLACEHOLDERS = {
 };
 
 export default function AttemptPage() {
+  const router = useRouter();
   const params = useParams();
   const attemptId = params.attemptId as string;
   const slug = params.id as string;
@@ -64,12 +67,34 @@ export default function AttemptPage() {
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
+  const [retrying, setRetrying] = useState(false);
   const [lastSaved, setLastSaved] = useState<string | null>(null);
 
   const [classes, setClasses] = useState("");
   const [responsibilities, setResponsibilities] = useState("");
   const [relationships, setRelationships] = useState("");
   const [designDecisions, setDesignDecisions] = useState("");
+
+  const handleRetry = async (fork: boolean) => {
+    if (!attempt) return;
+    setRetrying(true);
+    try {
+      const pId = attempt.problemId || attempt.problem.id;
+      const res = await fetch("/api/attempts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          problemId: pId,
+          ...(fork ? { forkFromAttemptId: attempt.id } : {}),
+        }),
+      });
+      const newAttempt = await res.json();
+      router.push(`/problems/${slug}/attempt/${newAttempt.id}`);
+    } catch (err) {
+      console.error("Retry failed:", err);
+      setRetrying(false);
+    }
+  };
 
   const fetchAttempt = useCallback(async () => {
     try {
@@ -434,14 +459,35 @@ export default function AttemptPage() {
                 </div>
               ))}
 
-              {/* Try again */}
-              <div className="pt-2">
-                <Link
-                  href={`/problems/${slug}`}
-                  className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors inline-block"
-                >
-                  Try Again
-                </Link>
+              {/* Try again / Continue options */}
+              <div className="pt-4 border-t border-[var(--border)] mt-6">
+                <p className="text-xs text-[var(--text-secondary)] mb-3 font-medium">
+                  Ready to improve? Choose how you would like to proceed:
+                </p>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    onClick={() => handleRetry(true)}
+                    disabled={retrying}
+                    className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 shadow-sm cursor-pointer"
+                  >
+                    <span>🔄</span>
+                    <span>{retrying ? "Creating..." : "Continue with this design"}</span>
+                  </button>
+                  <button
+                    onClick={() => handleRetry(false)}
+                    disabled={retrying}
+                    className="bg-[var(--bg-primary)] border border-[var(--border)] hover:border-[var(--accent)] hover:bg-[var(--bg-card-hover)] disabled:opacity-50 text-[var(--text-primary)] px-4 py-2.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 cursor-pointer"
+                  >
+                    <span>🆕</span>
+                    <span>Start fresh from zero</span>
+                  </button>
+                  <Link
+                    href={`/problems/${slug}`}
+                    className="text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors ml-auto"
+                  >
+                    ← Back to problem
+                  </Link>
+                </div>
               </div>
             </div>
           )}
