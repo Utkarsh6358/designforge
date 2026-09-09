@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-card: #1e293b;
+  --bg-card-hover: #334155;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --border: #334155;
+}
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* Status badge colors */
+.status-draft { color: var(--text-muted); background-color: #334155; }
+.status-submitted { color: #3b82f6; background-color: #1e3a5f; }
+.status-evaluating { color: #f59e0b; background-color: #422006; }
+.status-completed { color: #22c55e; background-color: #052e16; }
+.status-failed { color: #ef4444; background-color: #450a0a; }
+.status-partial { color: #f59e0b; background-color: #422006; }
+
+/* Score bar */
+.score-bar {
+  height: 8px;
+  border-radius: 4px;
+  background-color: #334155;
+  overflow: hidden;
+}
+.score-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+/* Difficulty badges */
+.diff-easy { color: #22c55e; border-color: #22c55e33; background-color: #22c55e11; }
+.diff-medium { color: #f59e0b; border-color: #f59e0b33; background-color: #f59e0b11; }
+.diff-hard { color: #ef4444; border-color: #ef444433; background-color: #ef444411; }
+
+/* Textarea styling */
+textarea {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 12px;
+  font-family: "JetBrains Mono", "Fira Code", monospace;
+  font-size: 14px;
+  resize: vertical;
+}
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+textarea::placeholder {
+  color: var(--text-muted);
+}
