@@ -21,10 +21,13 @@ export default function ProblemsPage() {
     fetch("/api/problems")
       .then((res) => res.json())
       .then((data) => {
-        setProblems(data);
+        setProblems(Array.isArray(data) ? data : []);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setProblems([]);
+        setLoading(false);
+      });
   }, []);
 
   if (loading) {
