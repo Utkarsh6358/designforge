@@ -1,4 +1,7 @@
-# AI Usage — LLD Practice Platform
+# AI Usage Report — DesignForge (LLD Practice Platform)
+
+**Author:** Utkarsh Kumar  
+**Date:** 10-09-2026  
 
 ## Introduction
 

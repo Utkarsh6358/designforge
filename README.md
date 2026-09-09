@@ -1,4 +1,4 @@
-# LLD Practice Platform
+# DesignForge — LLD Practice Platform
 
 A focused, full-stack practice platform for Low-Level Design (LLD) problems featuring structured, rubric-based feedback, versioned iteration, and swappable evaluation engines.
 

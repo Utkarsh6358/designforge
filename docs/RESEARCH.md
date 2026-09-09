@@ -1,7 +1,7 @@
-# Research Note: LLD Practice Platform
+# Research Note: DesignForge — LLD Practice Platform
 
-**Author:** [Candidate Name]  
-**Date:** [Date]  
+**Author:** Utkarsh Kumar  
+**Date:** 10-09-2026  
 
 ---
 

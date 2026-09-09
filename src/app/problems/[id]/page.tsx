@@ -181,34 +181,100 @@ export default function ProblemDetailPage() {
       </button>
 
       {/* Previous attempts */}
-      {attempts.length > 0 && (
-        <div className="mt-8">
-          <h2 className="font-semibold mb-3">Previous Attempts</h2>
-          <div className="space-y-2">
-            {attempts.map((att) => (
-              <Link key={att.id} href={`/problems/${slug}/attempt/${att.id}`}>
-                <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-4 hover:bg-[var(--bg-card-hover)] transition-colors flex items-center justify-between">
-                  <div>
-                    <span
-                      className={`text-xs font-medium px-2 py-0.5 rounded status-${att.status.toLowerCase()}`}
-                    >
-                      {att.status}
-                    </span>
-                    <span className="text-sm text-[var(--text-muted)] ml-3">
-                      {new Date(att.startedAt).toLocaleDateString()}
-                    </span>
+      {attempts.length > 0 && (() => {
+        const chronological = [...attempts].sort(
+          (a, b) =>
+            new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime()
+        );
+
+        let lastScore: number | null = null;
+        const attemptsWithMeta = chronological.map((att, index) => {
+          const currentScore =
+            att.latestSubmission?.evaluation?.overallScore != null
+              ? Math.round(att.latestSubmission.evaluation.overallScore)
+              : null;
+
+          let delta: number | null = null;
+          if (currentScore !== null && lastScore !== null) {
+            delta = currentScore - lastScore;
+          }
+          if (currentScore !== null) {
+            lastScore = currentScore;
+          }
+
+          return {
+            att,
+            attemptNumber: index + 1,
+            score: currentScore,
+            delta,
+          };
+        });
+
+        const displayAttempts = [...attemptsWithMeta].reverse();
+
+        return (
+          <div className="mt-8">
+            <h2 className="font-semibold mb-3">Previous Attempts</h2>
+            <div className="space-y-2">
+              {displayAttempts.map(({ att, attemptNumber, score, delta }) => (
+                <Link key={att.id} href={`/problems/${slug}/attempt/${att.id}`}>
+                  <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-4 hover:bg-[var(--bg-card-hover)] transition-colors flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-sm text-[var(--text-primary)]">
+                        Attempt {attemptNumber}
+                      </span>
+                      <span
+                        className={`text-xs font-medium px-2 py-0.5 rounded status-${att.status.toLowerCase()}`}
+                      >
+                        {att.status}
+                      </span>
+                      <span className="text-sm text-[var(--text-muted)]">
+                        {new Date(att.startedAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {score !== null ? (
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-sm font-bold font-mono ${
+                            score >= 70
+                              ? "text-[var(--success)]"
+                              : score >= 40
+                                ? "text-[var(--warning)]"
+                                : "text-[var(--danger)]"
+                          }`}
+                        >
+                          {score}/100
+                        </span>
+                        {delta !== null && (
+                          <span
+                            className={`text-xs font-bold px-2 py-0.5 rounded font-mono ${
+                              delta > 0
+                                ? "text-[var(--success)] bg-[#052e16] border border-[#14532d]"
+                                : delta < 0
+                                  ? "text-[var(--danger)] bg-[#450a0a] border border-[#7f1d1d]"
+                                  : "text-[var(--text-muted)] bg-[var(--bg-secondary)]"
+                            }`}
+                          >
+                            {delta > 0
+                              ? `↑ +${delta}`
+                              : delta < 0
+                                ? `↓ ${delta}`
+                                : `→ 0`}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-xs text-[var(--text-muted)]">
+                        {att.status === "Draft" ? "In Draft" : "In Progress"}
+                      </span>
+                    )}
                   </div>
-                  {att.latestSubmission?.evaluation?.overallScore != null && (
-                    <span className="text-sm font-medium text-[var(--accent)]">
-                      {att.latestSubmission.evaluation.overallScore.toFixed(1)}%
-                    </span>
-                  )}
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import "./globals.css";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "LLD Practice Platform",
+  title: "DesignForge",
   description:
     "Practice Low-Level Design problems and get structured, rubric-based feedback on your designs.",
 };
@@ -20,9 +20,9 @@ export default function RootLayout({
           <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
             <Link
               href="/"
-              className="text-lg font-semibold text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
+              className="text-lg font-bold text-[var(--text-primary)] hover:text-[var(--accent)] transition-colors"
             >
-              LLD Practice
+              DesignForge
             </Link>
             <div className="flex gap-6">
               <Link

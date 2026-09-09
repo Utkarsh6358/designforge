@@ -142,6 +142,7 @@ export default function AttemptPage() {
       const submission = await res.json();
 
       // Trigger evaluation
+      setSubmitting(false);
       setEvaluating(true);
       await fetch("/api/evaluations", {
         method: "POST",
@@ -150,6 +151,8 @@ export default function AttemptPage() {
       });
 
       await fetchAttempt();
+    } catch (err) {
+      console.error("Submission failed:", err);
     } finally {
       setSubmitting(false);
       setEvaluating(false);
@@ -175,7 +178,8 @@ export default function AttemptPage() {
   const latestSubmission = attempt.submissions?.[0];
   const evaluation = latestSubmission?.evaluation;
   const isCompleted = attempt.status === "Completed" || attempt.status === "Failed";
-  const canEdit = attempt.status === "Draft" || attempt.status === "Submitted";
+  const isEvaluating = evaluating || attempt.status === "Evaluating";
+  const canEdit = (attempt.status === "Draft" || attempt.status === "Submitted") && !isEvaluating;
 
   return (
     <div>
@@ -226,6 +230,21 @@ export default function AttemptPage() {
 
         {/* Right: Editor or Feedback */}
         <div className="lg:col-span-2">
+          {/* Evaluation in progress state */}
+          {isEvaluating && (
+            <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-xl p-8 text-center space-y-4">
+              <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--success)] bg-[#052e16] border border-[#14532d] px-3 py-1 rounded-full">
+                <span>✓</span> Submitted
+              </div>
+              <h3 className="text-xl font-bold text-[var(--text-primary)] flex items-center justify-center gap-2">
+                <span className="inline-block animate-spin">⏳</span> Evaluation in progress...
+              </h3>
+              <p className="text-sm text-[var(--text-secondary)]">
+                This usually takes a few seconds.
+              </p>
+            </div>
+          )}
+
           {/* Editor sections */}
           {canEdit && (
             <div className="space-y-4">
@@ -287,12 +306,13 @@ export default function AttemptPage() {
                   disabled={submitting || evaluating}
                   className="bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
                 >
-                  {evaluating
-                    ? "Evaluating..."
-                    : submitting
-                      ? "Submitting..."
-                      : "Submit for Evaluation"}
+                  {submitting ? "Submitting..." : "Submit for Evaluation"}
                 </button>
+                {submitting && (
+                  <span className="text-xs text-[var(--text-muted)] animate-pulse">
+                    Submitting design...
+                  </span>
+                )}
                 {lastSaved && (
                   <span className="text-xs text-[var(--text-muted)]">
                     Last saved: {lastSaved}
@@ -307,20 +327,39 @@ export default function AttemptPage() {
             <div className="space-y-4">
               {/* Overall score */}
               <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold">Overall Score</h3>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="inline-flex items-center gap-1.5 text-sm font-semibold text-[var(--success)] bg-[#052e16] border border-[#14532d] px-3 py-1 rounded-full">
+                    <span>✓</span> Evaluation Complete
+                  </div>
                   <span
-                    className={`text-2xl font-bold ${
-                      (evaluation.overallScore || 0) >= 70
-                        ? "text-[var(--success)]"
-                        : (evaluation.overallScore || 0) >= 40
-                          ? "text-[var(--warning)]"
-                          : "text-[var(--danger)]"
-                    }`}
+                    className={`text-xs px-2 py-0.5 rounded status-${evaluation.status.toLowerCase()}`}
                   >
-                    {evaluation.overallScore?.toFixed(1)}%
+                    {evaluation.status}
                   </span>
                 </div>
+
+                <div className="mb-3">
+                  <span className="text-xs uppercase tracking-wider text-[var(--text-muted)] font-medium block">
+                    Score
+                  </span>
+                  <div className="flex items-baseline gap-1 mt-1">
+                    <span
+                      className={`text-3xl font-extrabold ${
+                        (evaluation.overallScore || 0) >= 70
+                          ? "text-[var(--success)]"
+                          : (evaluation.overallScore || 0) >= 40
+                            ? "text-[var(--warning)]"
+                            : "text-[var(--danger)]"
+                      }`}
+                    >
+                      {Math.round(evaluation.overallScore || 0)}
+                    </span>
+                    <span className="text-lg text-[var(--text-muted)] font-normal">
+                      {" "}/ 100
+                    </span>
+                  </div>
+                </div>
+
                 <div className="score-bar">
                   <div
                     className="score-bar-fill"
@@ -335,11 +374,6 @@ export default function AttemptPage() {
                     }}
                   />
                 </div>
-                <span
-                  className={`text-xs mt-2 inline-block px-2 py-0.5 rounded status-${evaluation.status.toLowerCase()}`}
-                >
-                  {evaluation.status}
-                </span>
               </div>
 
               {/* Per-dimension feedback */}
@@ -409,18 +443,6 @@ export default function AttemptPage() {
                   Try Again
                 </Link>
               </div>
-            </div>
-          )}
-
-          {/* Evaluating state */}
-          {attempt.status === "Evaluating" && (
-            <div className="bg-[var(--bg-card)] border border-[var(--border)] rounded-lg p-8 text-center">
-              <p className="text-[var(--warning)] text-lg mb-2">
-                ⏳ Evaluating your submission...
-              </p>
-              <p className="text-sm text-[var(--text-muted)]">
-                This may take a few seconds. Refresh to check for results.
-              </p>
             </div>
           )}
         </div>

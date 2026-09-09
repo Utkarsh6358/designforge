@@ -1,6 +1,6 @@
-# Design Note: LLD Practice Platform
+# Design Note: DesignForge — LLD Practice Platform
 
-**Author:** UTKARSH KUMAR
+**Author:** Utkarsh Kumar  
 **Date:** 10-09-2026  
 **Status:** MVP Design — 2-Day Engineering Assignment
 
