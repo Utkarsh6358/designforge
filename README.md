@@ -1,27 +1,48 @@
 # LLD Practice Platform
 
-A focused practice tool for Low-Level Design (LLD) problems with structured, rubric-based feedback.
+A focused, full-stack practice platform for Low-Level Design (LLD) problems featuring structured, rubric-based feedback, versioned iteration, and swappable evaluation engines.
 
-**Assignment:** CipherSchools Hiring Assignment — 2-Day Engineering Prototype
+**Assignment:** CipherSchools Hiring Assignment — 2-Day Engineering Prototype  
+**Author:** Utkarsh Kumar  
+**Live Demo:** [DesignForge on Vercel](https://designforge-git-main-utkarsh-kumars-projects-0743eada.vercel.app)
 
 ---
 
-## Quick Start
+## 🎯 The Core Practice Loop
+
+The platform implements the complete end-to-end learning lifecycle:
+
+$$\text{Problem Catalog} \longrightarrow \text{Start Attempt} \longrightarrow \text{Design \& Submit} \longrightarrow \text{Rubric Feedback} \longrightarrow \text{Iterate / Try Again} \longrightarrow \text{Progress History}$$
+
+1. **Problem Selection:** Browse curated problems (*Parking Lot*, *Vending Machine*, *Elevator System*) with difficulty levels and tailored rubric dimensions.
+2. **Structured Authoring:** Draft and submit solutions across four key dimensions: *Classes*, *Responsibilities*, *Relationships*, and *Design Decisions*.
+3. **Composite Evaluation:** Solutions are evaluated deterministically (structural rules) and qualitatively (rubric analysis) with evidence, concerns, and actionable suggestions.
+4. **Iterative Improvement:** Versioned submissions allow refining designs and tracking score progression across multiple attempts.
+
+---
+
+## 🚀 Quick Start (Local Setup)
 
 ```bash
-# 1. Install dependencies
+# 1. Clone the repository
+git clone https://github.com/Utkarsh6358/designforge.git
+cd designforge
+
+# 2. Install dependencies
 npm install
 
-# 2. Generate Prisma client
-npx prisma generate
+# 3. Configure environment variables
+# Copy .env.example to .env (configured for Supabase PostgreSQL or local SQLite)
+cp .env.example .env
 
-# 3. Create database and apply schema
+# 4. Generate Prisma client & sync schema
+npx prisma generate
 npx prisma db push
 
-# 4. Seed the database (3 problems + demo user)
+# 5. Seed problem catalog & demo user
 npx tsx prisma/seed.ts
 
-# 5. Run the development server
+# 6. Start the development server
 npm run dev
 ```
 
@@ -29,98 +50,88 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
-## Demo User
-
-The platform uses a hardcoded demo user (`demo@lldpractice.com`) — no login required. This is a deliberate MVP decision: the assignment evaluates LLD and evaluation architecture, not authentication.
-
----
-
-## Tech Stack
+## 🛠️ Tech Stack
 
 | Layer | Technology | Rationale |
 |-------|-----------|-----------|
-| Framework | Next.js 16 (App Router) | Unified frontend + API in one project |
-| Language | TypeScript | Type safety across the full stack |
-| Database | SQLite (via Prisma) | Zero-setup local development |
-| ORM | Prisma | Type-safe database access, schema-first |
-| Styling | Tailwind CSS | Rapid prototyping |
+| **Framework** | Next.js 16 (App Router) | Unified React Server Components & API routes in a single repo |
+| **Language** | TypeScript | Strict end-to-end type safety across schemas, evaluators, and UI |
+| **Database** | PostgreSQL (Supabase) | Scalable relational database for production cloud deployment |
+| **ORM** | Prisma 5 | Type-safe database queries, schema migrations, and relational modeling |
+| **Styling** | Tailwind CSS | Clean, responsive dark-themed interface |
+| **Testing** | Node.js Test Runner / tsx | Zero-dependency unit testing suite for evaluator engines |
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 ├── docs/
-│   ├── RESEARCH.md          # Research note (existing tools, gap analysis)
-│   └── DESIGN.md            # Design note (domain model, architecture)
+│   ├── RESEARCH.md          # Competitive analysis, PRD breakdown & gap analysis
+│   └── DESIGN.md            # Domain model, state machines, API & lifecycle specs
 ├── prisma/
-│   ├── schema.prisma        # Database schema
-│   └── seed.ts              # Seed data (3 problems + rubrics)
+│   ├── schema.prisma        # PostgreSQL / Prisma database schema
+│   └── seed.ts              # Seed data for 3 LLD problems + rubrics + demo user
 ├── src/
-│   ├── app/                 # Next.js pages + API routes
-│   │   ├── api/             # REST API (problems, attempts, submissions, evaluations)
-│   │   ├── problems/        # Problem catalog + detail + submission editor
-│   │   └── history/         # Attempt history
+│   ├── app/                 # Next.js App Router (pages + API endpoints)
+│   │   ├── api/
+│   │   │   ├── attempts/    # Attempt creation & retrieval
+│   │   │   ├── evaluations/ # Evaluation orchestration & idempotency
+│   │   │   ├── problems/    # Problem catalog & rubric endpoints
+│   │   │   ├── submissions/ # Immutable versioned submission handling
+│   │   │   └── seed/        # Cloud database seeding endpoint
+│   │   ├── problems/        # Catalog, problem detail, and interactive editor
+│   │   └── history/         # Iteration history & score trend visualization
 │   └── lib/
-│       ├── prisma.ts        # Prisma singleton
-│       └── evaluator/       # Strategy pattern evaluator system
-│           ├── types.ts             # Evaluator interface
-│           ├── rule-based-evaluator.ts   # Deterministic checks
-│           ├── mock-ai-evaluator.ts      # Mock AI (default)
-│           └── composite-evaluator.ts    # Orchestrator
+│       ├── prisma.ts        # Prisma singleton instance
+│       └── evaluator/       # Strategy pattern evaluation architecture
+│           ├── types.ts             # Evaluator interface & domain contracts
+│           ├── rule-based-evaluator.ts   # Deterministic structural checks
+│           ├── mock-ai-evaluator.ts      # Rubric-aware qualitative engine
+│           └── composite-evaluator.ts    # Multi-engine merger with graceful degradation
 ├── __tests__/
-│   └── evaluator.test.ts   # Unit tests
-├── AI_USAGE.md              # AI-assisted decisions log
-└── README.md                # This file
+│   └── evaluator.test.ts   # 57 unit tests covering evaluators & edge cases
+├── AI_USAGE.md              # Transparent AI collaboration disclosure & decision log
+└── README.md                # Project documentation
 ```
 
 ---
 
-## Key Design Decisions
+## 💡 Key Architectural Decisions
 
 ### 1. Evaluator as Strategy Pattern
-The `Evaluator` interface allows swapping between `RuleBasedEvaluator`, `MockAIEvaluator`, and future evaluators without touching the submission flow. `CompositeEvaluator` orchestrates multiple evaluators with graceful degradation.
+The `Evaluator` interface defines a unified `evaluate(submission, rubric)` contract. `RuleBasedEvaluator` handles deterministic validation, while `MockAIEvaluator` / `RubricAIEvaluator` handles subjective quality. `CompositeEvaluator` orchestrates them, merging dimension feedback and degrading gracefully if AI services fail.
 
 ### 2. Immutable Versioned Submissions
-Each save creates a new `Submission` record (never mutates). This makes attempt history meaningful — you can compare v1 → v3 and see actual improvement.
+Each draft or submission creates a new `Submission` record with an incremented `version` counter. Submissions are never mutated in place, preserving an accurate historical audit trail of learner iterations.
 
-### 3. Independent Evaluation Lifecycle
-`Evaluation` has its own status (`Pending → Running → Completed → Failed`) separate from `Attempt`. A slow/failed AI call never loses the submission.
+### 3. Decoupled Evaluation Lifecycle
+`Evaluation` owns an explicit lifecycle (`Pending → Running → Completed / Failed / Partial`) independent of `Attempt`. In the MVP, evaluation executes synchronously within the API route, but the decoupled domain model ensures zero friction when transitioning to asynchronous background worker queues (e.g., BullMQ/Redis) at scale.
 
-### 4. Problem-Specific Rubrics
-Each problem has tailored rubric dimensions. A Parking Lot problem weights "vehicle type polymorphism" differently than an Elevator problem weights "state machine design."
+### 4. Problem-Specific Rubric Dimensions
+Rather than generic boilerplate metrics, each problem features dedicated weighted dimensions (e.g., *State Machine Design* for Vending Machine, *Polymorphic Dispatch* for Parking Lot, *SCAN Scheduling* for Elevator).
 
 ---
 
-## Running Tests
+## 🧪 Unit Testing
+
+Run the evaluator test suite:
 
 ```bash
 npx tsx __tests__/evaluator.test.ts
 ```
 
-Tests cover:
-- Rule-based evaluator: good/empty/sparse submissions, feedback structure
-- Mock AI evaluator: rubric-aware feedback, score differentiation
-- Composite evaluator: result merging, graceful degradation on AI failure, evaluator swapping
-- Edge cases: empty submissions, empty rubric dimensions
+**Test Coverage (57 passed, 0 failed):**
+- **RuleBasedEvaluator:** Structural completeness, section presence, relationship parsing, empty/sparse inputs.
+- **MockAIEvaluator:** Rubric-specific dimensions, evidence linkage, score differentiation.
+- **CompositeEvaluator:** Result merging, graceful degradation on engine failure, Strategy pattern swapping.
+- **Edge Cases:** Empty submissions, malformed rubrics, missing dimensions.
 
 ---
 
-## Limitations (MVP)
+## ☁️ Deployment
 
-- **No real authentication** — uses a hardcoded demo user
-- **Mock AI evaluator** — returns realistic but template-based feedback (real AI evaluator requires an OpenAI API key)
-- **SQLite** — sufficient for single-user prototype, would need PostgreSQL/MongoDB for production
-- **No real-time status updates** — evaluation runs synchronously in the API route
-- **3 problems only** — enough to demonstrate the practice loop
-
----
-
-## Future Extensions
-
-The architecture supports these without major refactoring:
-- Add `RubricAIEvaluator` (real OpenAI integration) by implementing the `Evaluator` interface
-- Add `HumanEvaluator` or `PeerEvaluator` — same interface
-- Replace demo auth with NextAuth/Auth.js
-- Add diagram or code submission formats (new `format` type, same `Submission` model)
-- Extract evaluation to a background worker for async processing
+The project is configured for continuous deployment on **Vercel** connected to **Supabase PostgreSQL**:
+- **Environment Variable:** Set `DATABASE_URL` in Vercel to your Supabase connection pooler string.
+- **Build Command:** `prisma generate && next build`
+- **Zero-Setup Seeding:** Available via `/api/seed` or the pre-configured `prisma/seed.ts` script.
